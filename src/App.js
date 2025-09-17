@@ -232,7 +232,10 @@ function App() {
             ? pedidos.map((pedido) => (
                 <div key={pedido.id} className="pedido-card">
                   <h3>Pedido #{pedido.id}</h3>
-                  <p>Cliente: **{pedido.cliente.nome}**</p>
+                  <p>
+                    Cliente:{" "}
+                    <strong>{pedido.cliente.nome.replace(/\*\*/g, "")}</strong>
+                  </p>
                   <p>
                     Status:{" "}
                     <span
