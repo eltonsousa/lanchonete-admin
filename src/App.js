@@ -8,6 +8,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ nome: "", senha: "" });
+  const [mostraSenha, setMostraSenha] = useState(false); // << AQUI ESTÁ A DECLARAÇÃO
 
   const fetchPedidos = async () => {
     try {
@@ -101,7 +102,6 @@ function App() {
     }
   };
 
-  // NOVA LÓGICA DE LOGIN
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -113,7 +113,7 @@ function App() {
       const data = await response.json();
       if (response.ok) {
         alert(data.message);
-        setIsLoggedIn(true); // Se o login for bem-sucedido, exibe o painel
+        setIsLoggedIn(true);
       } else {
         alert(`Erro: ${data.message}`);
       }
@@ -135,14 +135,24 @@ function App() {
             onChange={handleFormChange}
             required
           />
-          <input
-            type="password"
-            name="senha"
-            placeholder="Senha"
-            value={formData.senha}
-            onChange={handleFormChange}
-            required
-          />
+          <div className="password-input-container">
+            <input
+              type={mostraSenha ? "text" : "password"}
+              name="senha"
+              placeholder="Senha"
+              value={formData.senha}
+              onChange={handleFormChange}
+              required
+            />
+            <button
+              type="button"
+              className="mostrar-senha-btn"
+              onClick={() => setMostraSenha(!mostraSenha)}
+            >
+              {/* Apenas use o caractere de olho diretamente aqui */}
+              👁
+            </button>
+          </div>
           <button type="submit">{isLogin ? "Entrar" : "Registrar"}</button>
         </form>
         <p>
@@ -192,7 +202,7 @@ function App() {
               </p>
               <div className="status-botoes">
                 <button
-                  onClick={() => atualizarStatus(pedido.id, "Em preparação")}
+                  onClick={() => atualizarStatus(pedido.id, "Em preparacao")}
                 >
                   Em Preparação
                 </button>

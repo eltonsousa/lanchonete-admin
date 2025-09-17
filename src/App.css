@@ -190,15 +190,40 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.auth-container input {
+/* Novo estilo para o contêiner do campo de senha */
+.password-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
     margin-bottom: 1rem;
+}
+
+.password-input-container input {
+    flex-grow: 1;
+    margin-bottom: 0;
+    padding-right: 40px; /* Adiciona espaço para o ícone */
+}
+
+.auth-container input {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
 }
 
-.auth-container button {
+/* Novo estilo para o botão do olho */
+.mostrar-senha-btn {
+    position: absolute;
+    right: 10px; /* Ajusta a posição */
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #666; /* Cor do ícone */
+    z-index: 10;
+}
+
+.auth-container button[type="submit"] {
     padding: 10px;
     background-color: #3f51b5;
     color: white;
@@ -209,7 +234,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.auth-container button:hover {
+.auth-container button[type="submit"]:hover {
     background-color: #303f9f;
 }
 
