@@ -336,7 +336,10 @@ function App() {
             <h3>Itens Atuais</h3>
             {cardapio.map((item) => (
               <div key={item.id} className="item-cardapio-admin">
-                <img src={item.imagem} alt={item.nome} />
+                <img
+                  src={`http://localhost:3001/${item.imagem}`}
+                  alt={item.nome}
+                />
                 <div className="item-info-admin">
                   <h4>{item.nome}</h4>
                   <p>R$ {item.preco ? item.preco.toFixed(2) : "0.00"}</p>
