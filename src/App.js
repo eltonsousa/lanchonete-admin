@@ -245,6 +245,11 @@ function App() {
                   </p>
                   <div className="status-botoes">
                     <button
+                      className={`status-btn ${
+                        pedido.status === "Em preparação"
+                          ? "active-status-btn"
+                          : ""
+                      }`}
                       onClick={() =>
                         atualizarStatus(pedido.id, "Em preparação")
                       }
@@ -252,6 +257,11 @@ function App() {
                       Em Preparação
                     </button>
                     <button
+                      className={`status-btn ${
+                        pedido.status === "Pronto para entrega"
+                          ? "active-status-btn"
+                          : ""
+                      }`}
                       onClick={() =>
                         atualizarStatus(pedido.id, "Pronto para entrega")
                       }
@@ -259,6 +269,9 @@ function App() {
                       Pronto para Entrega
                     </button>
                     <button
+                      className={`status-btn ${
+                        pedido.status === "Entregue" ? "active-status-btn" : ""
+                      }`}
                       onClick={() => atualizarStatus(pedido.id, "Entregue")}
                     >
                       Entregue

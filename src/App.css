@@ -79,32 +79,60 @@ body {
     border-radius: 4px;
 }
 
+/* Estilos para os botões de status do pedido */
 .status-botoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.status-botoes button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9rem;
+.status-btn {
+  background-color: #f0f2f5;
+  color: #666;
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
 }
 
-.status-em-preparacao {
-    background-color: #f39c12;
+/* Estilo para o botão de status ativo */
+.active-status-btn {
+  background-color: #3f51b5; /* Cor principal */
+  color: white;
+  border-color: #3f51b5;
+  font-weight: bold;
+}
+
+.status-btn:hover {
+  background-color: #cdd5ff;
+  color: #3f51b5;
+}
+
+/* Estilos para o status de texto */
+.status-em-preparação {
+  color: white;
+  font-weight: bold;
+  border-radius: 3px;
+  background-color: #ff9800;
+  padding: 5px 10px;
 }
 
 .status-pronto-para-entrega {
-    background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  border-radius: 3px;
+  background-color: #2d81f0;
+  padding: 5px 10px;
 }
 
 .status-entregue {
-    background-color: #2ecc71;
+  color: white;
+  font-weight: bold;
+  border-radius: 3px;
+  background-color: #4caf50;
+  padding: 5px 10px;
 }
 
 .concluir-btn {
