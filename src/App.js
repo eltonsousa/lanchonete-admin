@@ -3,13 +3,24 @@ import "./App.css";
 
 function App() {
   const [pedidos, setPedidos] = useState([]);
+  const [cardapio, setCardapio] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ nome: "", senha: "" });
-  const [mostraSenha, setMostraSenha] = useState(false); // << AQUI ESTÁ A DECLARAÇÃO
+  const [mostraSenha, setMostraSenha] = useState(false);
+  const [currentPage, setCurrentPage] = useState("pedidos");
+  const [itemForm, setItemForm] = useState({
+    id: null,
+    nome: "",
+    descricao: "",
+    preco: "",
+    imagem: "",
+  });
+  const [isEditing, setIsEditing] = useState(false);
 
+  // FUNÇÕES DE PEDIDOS
   const fetchPedidos = async () => {
     try {
       const response = await fetch("http://localhost:3001/api/pedidos");
@@ -25,114 +36,151 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchPedidos();
-    }
-  }, [isLoggedIn]);
-
   const atualizarStatus = async (pedidoId, novoStatus) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/pedidos/${pedidoId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: novoStatus }),
-        }
-      );
-      if (response.ok) {
-        fetchPedidos();
-      } else {
-        console.error("Erro ao atualizar status.");
-      }
+      await fetch(`http://localhost:3001/api/pedidos/${pedidoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: novoStatus }),
+      });
+      fetchPedidos();
     } catch (error) {
-      console.error("Erro na conexão:", error);
+      console.error("Erro ao atualizar status:", error);
     }
   };
 
   const concluirPedido = async (pedidoId) => {
-    if (
-      window.confirm("Tem certeza que deseja concluir e remover este pedido?")
-    ) {
-      try {
-        const response = await fetch(
-          `http://localhost:3001/api/pedidos/${pedidoId}`,
-          {
-            method: "DELETE",
-          }
-        );
-        if (response.ok) {
-          fetchPedidos();
-        } else {
-          console.error("Erro ao remover o pedido.");
-        }
-      } catch (error) {
-        console.error("Erro na conexão:", error);
-      }
+    try {
+      await fetch(`http://localhost:3001/api/pedidos/${pedidoId}`, {
+        method: "DELETE",
+      });
+      fetchPedidos();
+    } catch (error) {
+      console.error("Erro ao concluir pedido:", error);
     }
   };
 
-  const handleFormChange = (e) => {
+  // FUNÇÕES DE AUTENTICAÇÃO
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const endpoint = isLogin ? "login" : "registrar";
     try {
       const response = await fetch(
-        "http://localhost:3001/api/usuarios/registrar",
+        `http://localhost:3001/api/usuarios/${endpoint}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nome: formData.nome, senha: formData.senha }),
+          body: JSON.stringify(formData),
         }
       );
-      const data = await response.json();
       if (response.ok) {
-        alert(data.message);
-        setIsLogin(true);
+        alert(isLogin ? "Login bem-sucedido!" : "Usuário registrado!");
+        if (isLogin) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLogin(true);
+        }
       } else {
-        alert(`Erro: ${data.message}`);
+        const data = await response.json();
+        alert(data.message);
       }
     } catch (error) {
-      alert("Erro ao se conectar com o servidor.");
+      alert("Erro na conexão com o servidor.");
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setPedidos([]);
+    setCardapio([]);
+    setLoading(true);
+  };
+
+  // FUNÇÕES DE CARDÁPIO (COM CORREÇÃO DE PREÇO)
+  const fetchCardapio = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/usuarios/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome: formData.nome, senha: formData.senha }),
-      });
+      const response = await fetch("http://localhost:3001/api/cardapio");
       const data = await response.json();
-      if (response.ok) {
-        alert(data.message);
-        setIsLoggedIn(true);
-      } else {
-        alert(`Erro: ${data.message}`);
-      }
+      setCardapio(data);
     } catch (error) {
-      alert("Erro ao se conectar com o servidor.");
+      console.error("Erro ao buscar cardápio:", error);
     }
   };
+
+  const handleItemFormChange = (e) => {
+    const { name, value } = e.target;
+    setItemForm({
+      ...itemForm,
+      [name]: name === "preco" ? parseFloat(value) : value,
+    });
+  };
+
+  const handleItemSubmit = async (e) => {
+    e.preventDefault();
+    const method = isEditing ? "PUT" : "POST";
+    const url = isEditing
+      ? `http://localhost:3001/api/cardapio/${itemForm.id}`
+      : "http://localhost:3001/api/cardapio";
+
+    try {
+      // Cria um objeto com os valores corretos (preço já é um número)
+      const itemToSave = { ...itemForm, preco: parseFloat(itemForm.preco) };
+
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(itemToSave),
+      });
+      fetchCardapio();
+      setItemForm({ id: null, nome: "", descricao: "", preco: "", imagem: "" });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Erro ao salvar item:", error);
+    }
+  };
+
+  const handleEdit = (item) => {
+    setItemForm(item);
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (itemId) => {
+    try {
+      await fetch(`http://localhost:3001/api/cardapio/${itemId}`, {
+        method: "DELETE",
+      });
+      fetchCardapio();
+    } catch (error) {
+      console.error("Erro ao deletar item:", error);
+    }
+  };
+
+  // EFEITOS
+  useEffect(() => {
+    if (isLoggedIn) {
+      if (currentPage === "pedidos") {
+        fetchPedidos();
+      } else if (currentPage === "cardapio") {
+        fetchCardapio();
+      }
+    }
+  }, [isLoggedIn, currentPage]);
 
   if (!isLoggedIn) {
     return (
       <div className="auth-container">
-        <h2>{isLogin ? "Login do Administrador" : "Registrar-se"}</h2>
-        <form onSubmit={isLogin ? handleLogin : handleRegister}>
+        <h2>{isLogin ? "Painel do Administrador" : "Registrar"}</h2>
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             name="nome"
-            placeholder="Nome de Usuário"
+            placeholder="Nome de usuário"
             value={formData.nome}
-            onChange={handleFormChange}
+            onChange={handleChange}
             required
           />
           <div className="password-input-container">
@@ -141,25 +189,23 @@ function App() {
               name="senha"
               placeholder="Senha"
               value={formData.senha}
-              onChange={handleFormChange}
+              onChange={handleChange}
               required
             />
             <button
               type="button"
-              className="mostrar-senha-btn"
               onClick={() => setMostraSenha(!mostraSenha)}
+              className="mostrar-senha-btn"
             >
-              {/* Apenas use o caractere de olho diretamente aqui */}
-              👁
+              {mostraSenha ? "🙈" : "👁️"}
             </button>
           </div>
           <button type="submit">{isLogin ? "Entrar" : "Registrar"}</button>
         </form>
-        <p>
-          {isLogin ? "Não tem uma conta? " : "Já tem uma conta? "}
-          <span onClick={() => setIsLogin(!isLogin)} className="toggle-form">
-            {isLogin ? "Criar Conta" : "Fazer Login"}
-          </span>
+        <p onClick={() => setIsLogin(!isLogin)} className="toggle-auth">
+          {isLogin
+            ? "Não tem uma conta? Crie uma."
+            : "Já tem uma conta? Faça login."}
         </p>
       </div>
     );
@@ -168,77 +214,142 @@ function App() {
   return (
     <div className="painel-admin">
       <header>
-        <h1>Painel de Administração</h1>
-        <p>Gerenciamento de Pedidos</p>
+        <h1>Painel do Administrador</h1>
+        <p>Olá, {formData.nome}!</p>
+        <nav className="nav-menu">
+          <button onClick={() => setCurrentPage("pedidos")}>Pedidos</button>
+          <button onClick={() => setCurrentPage("cardapio")}>Cardápio</button>
+          <button onClick={handleLogout}>Sair</button>
+        </nav>
       </header>
 
-      <main className="lista-pedidos">
-        {loading ? (
-          <div className="loading-state">Carregando pedidos...</div>
-        ) : error ? (
-          <div className="error-state">Erro: {error}</div>
-        ) : pedidos.length > 0 ? (
-          pedidos.map((pedido) => (
-            <div key={pedido.id} className="pedido-card">
-              <h3>Pedido #{pedido.id}</h3>
-              <p>
-                <strong>Cliente:</strong> {pedido.cliente.nome}
-              </p>
-              <p>
-                <strong>Endereço:</strong> {pedido.cliente.endereco}
-              </p>
-              <p>
-                <strong>Total:</strong> R$ {pedido.total}
-              </p>
-              <p className="status-label">
-                <strong>Status:</strong>{" "}
-                <span
-                  className={`status-${pedido.status
-                    .replace(/\s+/g, "-")
-                    .toLowerCase()}`}
-                >
-                  {pedido.status}
-                </span>
-              </p>
-              <div className="status-botoes">
-                <button
-                  onClick={() => atualizarStatus(pedido.id, "Em preparacao")}
-                >
-                  Em Preparação
-                </button>
-                <button
-                  onClick={() =>
-                    atualizarStatus(pedido.id, "Pronto para entrega")
-                  }
-                >
-                  Pronto para Entrega
-                </button>
-                <button onClick={() => atualizarStatus(pedido.id, "Entregue")}>
-                  Entregue
-                </button>
-              </div>
-              <h4>Itens:</h4>
-              <ul>
-                {pedido.itens.map((item) => (
-                  <li key={item.id}>
-                    {item.nome} (x{item.quantidade})
-                  </li>
-                ))}
-              </ul>
-              <button
-                className="concluir-btn"
-                onClick={() => concluirPedido(pedido.id)}
-              >
-                Concluir Pedido
+      {/* Conteúdo da página de Pedidos */}
+      {currentPage === "pedidos" && (
+        <main className="lista-pedidos">
+          {loading && <p className="loading">Carregando pedidos...</p>}
+          {error && <p className="error">Erro: {error}</p>}
+          {!loading && pedidos.length > 0
+            ? pedidos.map((pedido) => (
+                <div key={pedido.id} className="pedido-card">
+                  <h3>Pedido #{pedido.id}</h3>
+                  <p>Cliente: **{pedido.cliente.nome}**</p>
+                  <p>
+                    Status:{" "}
+                    <span
+                      className={`status-${pedido.status
+                        .replace(/\s+/g, "-")
+                        .toLowerCase()}`}
+                    >
+                      {pedido.status}
+                    </span>
+                  </p>
+                  <div className="status-botoes">
+                    <button
+                      onClick={() =>
+                        atualizarStatus(pedido.id, "Em preparação")
+                      }
+                    >
+                      Em Preparação
+                    </button>
+                    <button
+                      onClick={() =>
+                        atualizarStatus(pedido.id, "Pronto para entrega")
+                      }
+                    >
+                      Pronto para Entrega
+                    </button>
+                    <button
+                      onClick={() => atualizarStatus(pedido.id, "Entregue")}
+                    >
+                      Entregue
+                    </button>
+                  </div>
+                  <h4>Itens:</h4>
+                  <ul>
+                    {pedido.itens.map((item) => (
+                      <li key={item.id}>
+                        {item.nome} (x{item.quantidade})
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    className="concluir-btn"
+                    onClick={() => concluirPedido(pedido.id)}
+                  >
+                    Concluir Pedido
+                  </button>
+                </div>
+              ))
+            : !loading && (
+                <div className="sem-pedidos">
+                  <p>Nenhum pedido recebido ainda.</p>
+                </div>
+              )}
+        </main>
+      )}
+
+      {/* Conteúdo da página de Cardápio */}
+      {currentPage === "cardapio" && (
+        <main className="painel-cardapio">
+          <h2>Gerenciar Cardápio</h2>
+          <div className="cardapio-form">
+            <form onSubmit={handleItemSubmit}>
+              <input
+                type="text"
+                name="nome"
+                placeholder="Nome do Item"
+                value={itemForm.nome}
+                onChange={handleItemFormChange}
+                required
+              />
+              <input
+                type="text"
+                name="descricao"
+                placeholder="Descrição"
+                value={itemForm.descricao}
+                onChange={handleItemFormChange}
+                required
+              />
+              <input
+                type="number"
+                name="preco"
+                placeholder="Preço"
+                value={itemForm.preco}
+                onChange={handleItemFormChange}
+                step="0.01"
+                required
+              />
+              <input
+                type="text"
+                name="imagem"
+                placeholder="URL da Imagem"
+                value={itemForm.imagem}
+                onChange={handleItemFormChange}
+                required
+              />
+              <button type="submit">
+                {isEditing ? "Salvar Alterações" : "Adicionar Item"}
               </button>
-            </div>
-          ))
-        ) : (
-          <div className="sem-pedidos">
-            <p>Nenhum pedido recebido ainda.</p>
+            </form>
           </div>
-        )}
-      </main>
+          <div className="cardapio-lista">
+            <h3>Itens Atuais</h3>
+            {cardapio.map((item) => (
+              <div key={item.id} className="item-cardapio-admin">
+                <img src={item.imagem} alt={item.nome} />
+                <div className="item-info-admin">
+                  <h4>{item.nome}</h4>
+                  <p>R$ {item.preco ? item.preco.toFixed(2) : "0.00"}</p>
+                </div>
+                <div className="item-botoes-admin">
+                  <button onClick={() => handleEdit(item)}>Editar</button>
+                  <button onClick={() => handleDelete(item.id)}>Remover</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      )}
     </div>
   );
 }
