@@ -53,6 +53,15 @@ body {
     justify-content: center;
 }
 
+.titulo-pedidos-recebidos{
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
+    text-align: center;
+}
+
 .pedido-card {
     background-color: white;
     border-radius: 8px;

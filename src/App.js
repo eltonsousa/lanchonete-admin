@@ -245,9 +245,9 @@ function App() {
       </header>
 
       {/* Conteúdo da página de Pedidos */}
+      <h2 className="titulo-pedidos-recebidos">Pedidos Recebidos</h2>
       {currentPage === "pedidos" && (
         <main className="lista-pedidos">
-          <h2>Pedidos Recebidos</h2>
           {loading && <p className="loading">Carregando pedidos...</p>}
           {error && <p className="error">Erro: {error}</p>}
           {!loading && pedidos.length > 0
