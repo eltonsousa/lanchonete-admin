@@ -1,38 +1,226 @@
-.App {
-  text-align: center;
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    color: #333;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.painel-admin header {
+    background-color: #3f51b5;
+    color: white;
+    padding: 1.5rem 1rem;
+    text-align: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.painel-admin h1 {
+    margin: 0;
+    font-size: 2.5rem;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.painel-admin p {
+    margin: 0.5rem 0 0;
+    font-size: 1.2rem;
 }
 
-.App-link {
-  color: #61dafb;
+.lista-pedidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    justify-content: center;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.pedido-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    width: 300px;
+    border-left: 5px solid #3f51b5;
+}
+
+.pedido-card h3 {
+    margin-top: 0;
+    color: #3f51b5;
+}
+
+.pedido-card ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.pedido-card li {
+    background-color: #e8eaf6;
+    margin-bottom: 5px;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.sem-pedidos, .loading-state, .error-state {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.error-state {
+    color: #d32f2f;
+}
+
+/* No final do App.css do painel */
+.pedido-card p {
+  margin: 5px 0;
+}
+
+/* Estilos para o status do pedido */
+.status-label {
+    margin: 10px 0;
+}
+
+.status-label span {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.status-em-preparação {
+    background-color: #ff9800; /* Laranja */
+}
+
+.status-pronto-para-entrega {
+    background-color: #2196f3; /* Azul */
+}
+
+.status-entregue {
+    background-color:  #4caf50; /* Verde */
+}
+
+/* Estilos para os botões de status */
+.status-botoes {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.status-botoes button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.3s ease;
+}
+
+.status-botoes button:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo para o botão de conclusão */
+.concluir-btn {
+    background-color: #f44336; /* Vermelho */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 20px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.concluir-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* Estilos para o status do pedido */
+.status-label {
+    margin: 10px 0;
+}
+
+.status-label span {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.9rem;
+}
+
+.status-em-preparação {
+    background-color: #ff9800; /* Laranja */
+}
+
+.status-pronto-para-entrega {
+    background-color: #2196f3; /* Azul */
+}
+
+.status-entregue {
+    background-color: #4caf50; /* Verde */
+}
+
+/* Estilos para a tela de autenticação */
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.auth-container h2 {
+    color: #3f51b5;
+    margin-bottom: 2rem;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container input {
+    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.auth-container button {
+    padding: 10px;
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+}
+
+.auth-container button:hover {
+    background-color: #303f9f;
+}
+
+.auth-container p {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-container .toggle-form {
+    color: #3f51b5;
+    cursor: pointer;
+    font-weight: bold;
 }
