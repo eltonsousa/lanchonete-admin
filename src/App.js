@@ -6,7 +6,10 @@ function App() {
   const [cardapio, setCardapio] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // 📢 Troca de localStorage para sessionStorage
+    return sessionStorage.getItem("isLoggedIn") === "true";
+  });
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ nome: "", senha: "" });
   const [mostraSenha, setMostraSenha] = useState(false);
@@ -60,47 +63,7 @@ function App() {
     }
   };
 
-  // FUNÇÕES DE AUTENTICAÇÃO
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const endpoint = isLogin ? "login" : "registrar";
-    try {
-      const response = await fetch(
-        `http://localhost:3001/api/usuarios/${endpoint}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
-      if (response.ok) {
-        alert(isLogin ? "Login bem-sucedido!" : "Usuário registrado!");
-        if (isLogin) {
-          setIsLoggedIn(true);
-        } else {
-          setIsLogin(true);
-        }
-      } else {
-        const data = await response.json();
-        alert(data.message);
-      }
-    } catch (error) {
-      alert("Erro na conexão com o servidor.");
-    }
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setPedidos([]);
-    setCardapio([]);
-    setLoading(true);
-  };
-
-  // FUNÇÕES DE CARDÁPIO (COM CORREÇÃO DE PREÇO)
+  // FUNÇÕES DE CARDÁPIO
   const fetchCardapio = async () => {
     try {
       const response = await fetch("http://localhost:3001/api/cardapio");
@@ -159,6 +122,63 @@ function App() {
     }
   };
 
+  // FUNÇÕES DE AUTENTICAÇÃO (CORRIGIDAS)
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:3001/api/usuarios/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        setIsLoggedIn(true);
+        sessionStorage.setItem("isLoggedIn", "true"); // PERSISTE O LOGIN
+        setFormData({ nome: "", senha: "" });
+        setCurrentPage("pedidos");
+      } else {
+        const data = await response.json();
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("Erro ao fazer login. Verifique o servidor.");
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        "http://localhost:3001/api/usuarios/registrar",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+      const data = await response.json();
+      if (response.status === 201) {
+        alert("Usuário registrado com sucesso! Faça login.");
+        setIsLogin(true);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert("Erro ao registrar. Verifique o servidor.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    sessionStorage.removeItem("isLoggedIn"); // 📢 Limpa a chave de persistência
+    setCurrentPage("pedidos"); // Volta para a página inicial (se necessário)
+    alert("Logout realizado com sucesso!");
+  };
+
   // EFEITOS
   useEffect(() => {
     if (isLoggedIn) {
@@ -174,7 +194,8 @@ function App() {
     return (
       <div className="auth-container">
         <h2>{isLogin ? "Painel do Administrador" : "Registrar"}</h2>
-        <form onSubmit={handleSubmit}>
+        {/* CORREÇÃO AQUI: Chama handleLogin ou handleRegister */}
+        <form onSubmit={isLogin ? handleLogin : handleRegister}>
           <input
             type="text"
             name="nome"
@@ -226,6 +247,7 @@ function App() {
       {/* Conteúdo da página de Pedidos */}
       {currentPage === "pedidos" && (
         <main className="lista-pedidos">
+          <h2>Pedidos Recebidos</h2>
           {loading && <p className="loading">Carregando pedidos...</p>}
           {error && <p className="error">Erro: {error}</p>}
           {!loading && pedidos.length > 0
